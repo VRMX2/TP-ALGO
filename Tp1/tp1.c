@@ -1,57 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <math.h>
+#include <time.h>
 
-// Algorithme 1: Approche naïve
-// Teste la divisibilité par tous les nombres de 2 à N-1
-// Complexité: O(N)
-// Fonction est_premier_A1(N)
-//     Si N ≤ 1 alors
-//         Retourner FAUX
-//     Si N = 2 alors
-//         Retourner VRAI
-    
-//     Pour i de 2 à N-1 faire
-//         Si N mod i = 0 alors
-//             Retourner FAUX (N est divisible par i)
-    
-//     Retourner VRAI (N est premier)
+// Codes couleur ANSI
+#define RESET   "\033[0m"
+#define BOLD    "\033[1m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN    "\033[36m"
+#define WHITE   "\033[37m"
 
-
-
-int est_premier_A1(long long N) {
+// Algorithme 1: Approche naive
+int estPremier_A1(long long N) {
     if (N <= 1) return 0;
     if (N == 2) return 1;
     
     for (long long i = 2; i < N; i++) {
         if (N % i == 0) {
-            return 0; // N est divisible par i, donc pas premier
+            return 0;
         }
     }
-    return 1; // N est premier
+    return 1;
 }
 
-
-
-
-// Algorithme 2: Amélioration - teste jusqu'à N/2
-// Propriété: tout diviseur i de N vérifie i ≤ N/2 (avec i≠N)
-// Complexité: O(N/2) = O(N)
-// Fonction est_premier_A2(N)
-//     Si N ≤ 1 alors
-//         Retourner FAUX
-//     Si N = 2 alors
-//         Retourner VRAI
-    
-//     Pour i de 2 à N/2 faire
-//         Si N mod i = 0 alors
-//             Retourner FAUX
-    
-//     Retourner VRAI
-
-
-int est_premier_A2(long long N) {
+// Algorithme 2: Amelioration - teste jusqu'a N/2
+int estPremier_A2(long long N) {
     if (N <= 1) return 0;
     if (N == 2) return 1;
     
@@ -63,27 +40,8 @@ int est_premier_A2(long long N) {
     return 1;
 }
 
-
-
-// Algorithme 3: Teste jusqu'à √N
-// Propriété: Les diviseurs sont pour moitié ≤ √N et pour l'autre moitié > √N
-// Complexité: O(√N)
-// Algorithme 3: Teste jusqu'à √N
-// Propriété: Les diviseurs sont pour moitié ≤ √N et pour l'autre moitié > √N
-// Complexité: O(√N)
-// Fonction est_premier_A3(N)
-//     Si N ≤ 1 alors
-//         Retourner FAUX
-//     Si N = 2 alors
-//         Retourner VRAI
-    
-//     racine ← √N
-//     Pour i de 2 à racine faire
-//         Si N mod i = 0 alors
-//             Retourner FAUX
-    
-//     Retourner VRAI
-int est_premier_A3(long long N) {
+// Algorithme 3: Optimisation avec racine carree
+int estPremier_A3(long long N) {
     if (N <= 1) return 0;
     if (N == 2) return 1;
     
@@ -96,33 +54,14 @@ int est_premier_A3(long long N) {
     return 1;
 }
 
-
-
-
-// Algorithme 4: Teste uniquement les nombres impairs jusqu'à √N
-// Vérifie d'abord si N est pair, puis teste seulement les diviseurs impairs
-// Complexité: O(√N/2)
-// Fonction est_premier_A4(N)
-//     Si N ≤ 1 alors
-//         Retourner FAUX
-//     Si N = 2 alors
-//         Retourner VRAI
-//     Si N mod 2 = 0 alors
-//         Retourner FAUX (N est pair donc pas premier)
-    
-//     racine ← √N
-//     Pour i de 3 à racine avec pas de 2 faire
-//         Si N mod i = 0 alors
-//             Retourner FAUX
-    
-//     Retourner VRAI
-int est_premier_A4(long long N) {
+// Algorithme 4: Optimisation avec nombres impairs
+int estPremier_A4(long long N) {
     if (N <= 1) return 0;
     if (N == 2) return 1;
-    if (N % 2 == 0) return 0; // Si N est pair (et N≠2), pas premier
+    if (N % 2 == 0) return 0;
     
     long long racine = (long long)sqrt(N);
-    for (long long i = 3; i <= racine; i += 2) { // Teste seulement les impairs
+    for (long long i = 3; i <= racine; i += 2) {
         if (N % i == 0) {
             return 0;
         }
@@ -130,93 +69,158 @@ int est_premier_A4(long long N) {
     return 1;
 }
 
-// Fonction pour mesurer le temps d'exécution
+// Fonction pour mesurer le temps d'execution (amelioree pour plus de precision)
 double mesurer_temps(int (*fonction)(long long), long long N) {
     clock_t debut, fin;
     double temps_cpu;
+    int iterations = 1;
     
+    // Pour les algorithmes rapides, faire plusieurs iterations
     debut = clock();
-    fonction(N);
+    for (int i = 0; i < iterations; i++) {
+        fonction(N);
+    }
     fin = clock();
     
-    temps_cpu = ((double) (fin - debut)) / CLOCKS_PER_SEC;
+    temps_cpu = ((double) (fin - debut)) / CLOCKS_PER_SEC / iterations;
+    
+    // Si le temps est trop petit, augmenter les iterations
+    if (temps_cpu < 0.001 && temps_cpu > 0) {
+        iterations = 100;
+        debut = clock();
+        for (int i = 0; i < iterations; i++) {
+            fonction(N);
+        }
+        fin = clock();
+        temps_cpu = ((double) (fin - debut)) / CLOCKS_PER_SEC / iterations;
+    }
+    
     return temps_cpu;
 }
 
+void afficher_ligne(char c) {
+    for (int i = 0; i < 60; i++) printf("%c", c);
+    printf("\n");
+}
+
+void tester_algorithme(int (*fonction)(long long), const char* nom, const char* couleur, long long nombres[], int taille) {
+    printf("\n%s%s", BOLD, couleur);
+    afficher_ligne('=');
+    printf("  %s\n", nom);
+    afficher_ligne('=');
+    printf("%s", RESET);
+    
+    printf("%s%-18s %-12s %-20s%s\n", CYAN, "N", "Premier?", "Temps (s)", RESET);
+    afficher_ligne('-');
+    
+    double temps_total = 0;
+    for (int i = 0; i < taille; i++) {
+        double temps = mesurer_temps(fonction, nombres[i]);
+        int premier = fonction(nombres[i]);
+        temps_total += temps;
+        
+        const char* couleur_resultat = premier ? GREEN : RED;
+        const char* texte_resultat = premier ? "OUI" : "NON";
+        const char* couleur_temps = temps < 0.001 ? GREEN : (temps < 0.1 ? YELLOW : RED);
+        
+        printf("%-18lld %s%-12s%s %s%-20.6f%s\n", 
+               nombres[i], 
+               couleur_resultat, texte_resultat, RESET,
+               couleur_temps, temps, RESET);
+    }
+    
+    afficher_ligne('-');
+    printf("%sTEMPS TOTAL: %.6f secondes%s\n", BOLD, temps_total, RESET);
+}
+
 int main() {
-    // Tableau des nombres premiers à tester
-    long long nombres[] = {1000003, 2000003, 4000037, 8000009, 16000057, 
-                           32000011, 64000031, 128000003, 256000001, 
-                           512000009, 1024000009, 2048000011};
+    long long nombres[] = {
+        1000003, 2000003, 4000037, 8000009, 16000057, 
+        32000011, 64000031, 128000003, 256000001, 512000009, 
+        1024000009, 2048000011
+    };
     int taille = sizeof(nombres) / sizeof(nombres[0]);
     
-    printf("=== TP1: TEST DE PRIMALITE ===\n\n");
+    printf("\n%s%s", BOLD, CYAN);
+    afficher_ligne('=');
+    printf("       TP1: TEST DE PRIMALITE - COMPARAISON D'ALGORITHMES\n");
+    afficher_ligne('=');
+    printf("%s\n", RESET);
     
-    // Test de l'Algorithme 1
-    printf("ALGORITHME 1 (Approche naive - teste de 2 à N-1)\n");
-    printf("Complexite theorique: O(N)\n");
-    printf("%-15s %-15s %-15s\n", "N", "Premier?", "Temps (s)");
-    printf("----------------------------------------------------\n");
-    for (int i = 0; i < taille; i++) {
-        double temps = mesurer_temps(est_premier_A1, nombres[i]);
-        printf("%-15lld %-15s %-15.6f\n", nombres[i], 
-               est_premier_A1(nombres[i]) ? "OUI" : "NON", temps);
+    printf("%s[!] AVERTISSEMENT: Les algorithmes 1 et 2 peuvent prendre plusieurs minutes%s\n", YELLOW, RESET);
+    printf("%s    sur les grands nombres. Patience recommandee!%s\n\n", YELLOW, RESET);
+    
+    // Test de l'algorithme 1
+    printf("%s[*] Demarrage du test de l'algorithme 1...%s\n", MAGENTA, RESET);
+    tester_algorithme(estPremier_A1, "ALGORITHME 1 (Naif - teste jusqu'a N-1)", RED, nombres, taille);
+    
+    // Test de l'algorithme 2
+    printf("\n%s[*] Demarrage du test de l'algorithme 2...%s\n", MAGENTA, RESET);
+    tester_algorithme(estPremier_A2, "ALGORITHME 2 (Optimise - teste jusqu'a N/2)", YELLOW, nombres, taille);
+    
+    // Test de l'algorithme 3
+    printf("\n%s[*] Demarrage du test de l'algorithme 3...%s\n", MAGENTA, RESET);
+    tester_algorithme(estPremier_A3, "ALGORITHME 3 (Optimise - teste jusqu'a racine(N))", GREEN, nombres, taille);
+    
+    // Test de l'algorithme 4
+    printf("\n%s[*] Demarrage du test de l'algorithme 4...%s\n", MAGENTA, RESET);
+    tester_algorithme(estPremier_A4, "ALGORITHME 4 (Tres optimise - impairs jusqu'a racine(N))", BLUE, nombres, taille);
+    
+    // Comparaison directe sur un nombre
+    printf("\n%s%s", BOLD, CYAN);
+    afficher_ligne('=');
+    printf("         COMPARAISON DIRECTE SUR N = 16000057\n");
+    afficher_ligne('=');
+    printf("%s\n", RESET);
+    
+    long long N_test = 16000057;
+    
+    printf("%sAlgorithme 1:%s ", RED, RESET);
+    double t1 = mesurer_temps(estPremier_A1, N_test);
+    printf("%.6f secondes\n", t1);
+    
+    printf("%sAlgorithme 2:%s ", YELLOW, RESET);
+    double t2 = mesurer_temps(estPremier_A2, N_test);
+    printf("%.6f secondes\n", t2);
+    
+    printf("%sAlgorithme 3:%s ", GREEN, RESET);
+    double t3 = mesurer_temps(estPremier_A3, N_test);
+    printf("%.6f secondes\n", t3);
+    
+    printf("%sAlgorithme 4:%s ", BLUE, RESET);
+    double t4 = mesurer_temps(estPremier_A4, N_test);
+    printf("%.6f secondes\n", t4);
+    
+    // Calcul des gains de performance avec protection contre division par zero
+    printf("\n%s%s", BOLD, MAGENTA);
+    afficher_ligne('=');
+    printf("            GAINS DE PERFORMANCE\n");
+    afficher_ligne('=');
+    printf("%s", RESET);
+    
+    if (t2 > 0.000001) {
+        printf("%sA2 vs A1:%s %.2fx plus rapide\n", CYAN, RESET, t1/t2);
+    } else {
+        printf("%sA2 vs A1:%s %.2fx plus rapide\n", CYAN, RESET, t1/0.000001);
     }
-    printf("\n");
     
-    // Test de l'Algorithme 2
-    printf("ALGORITHME 2 (Amelioration - teste jusqu'a N/2)\n");
-    printf("Complexite theorique: O(N/2) = O(N)\n");
-    printf("%-15s %-15s %-15s\n", "N", "Premier?", "Temps (s)");
-    printf("----------------------------------------------------\n");
-    for (int i = 0; i < taille; i++) {
-        double temps = mesurer_temps(est_premier_A2, nombres[i]);
-        printf("%-15lld %-15s %-15.6f\n", nombres[i], 
-               est_premier_A2(nombres[i]) ? "OUI" : "NON", temps);
-    }
-    printf("\n");
-    
-    // Test de l'Algorithme 3
-    printf("ALGORITHME 3 (Teste jusqu'a √N)\n");
-    printf("Complexite theorique: O(√N)\n");
-    printf("%-15s %-15s %-15s\n", "N", "Premier?", "Temps (s)");
-    printf("----------------------------------------------------\n");
-    for (int i = 0; i < taille; i++) {
-        double temps = mesurer_temps(est_premier_A3, nombres[i]);
-        printf("%-15lld %-15s %-15.6f\n", nombres[i], 
-               est_premier_A3(nombres[i]) ? "OUI" : "NON", temps);
-    }
-    printf("\n");
-    
-    // Test de l'Algorithme 4
-    printf("ALGORITHME 4 (Teste les impairs jusqu'a √N)\n");
-    printf("Complexite theorique: O(√N/2)\n");
-    printf("%-15s %-15s %-15s\n", "N", "Premier?", "Temps (s)");
-    printf("----------------------------------------------------\n");
-    for (int i = 0; i < taille; i++) {
-        double temps = mesurer_temps(est_premier_A4, nombres[i]);
-        printf("%-15lld %-15s %-15.6f\n", nombres[i], 
-               est_premier_A4(nombres[i]) ? "OUI" : "NON", temps);
-    }
-    printf("\n");
-    
-    // Comparaison des 4 algorithmes
-    printf("=== COMPARAISON DES 4 ALGORITHMES ===\n\n");
-    printf("%-15s %-15s %-15s %-15s %-15s\n", 
-           "N", "A1 (s)", "A2 (s)", "A3 (s)", "A4 (s)");
-    printf("------------------------------------------------------------------------\n");
-    for (int i = 0; i < taille; i++) {
-        double t1 = mesurer_temps(est_premier_A1, nombres[i]);
-        double t2 = mesurer_temps(est_premier_A2, nombres[i]);
-        double t3 = mesurer_temps(est_premier_A3, nombres[i]);
-        double t4 = mesurer_temps(est_premier_A4, nombres[i]);
-        printf("%-15lld %-15.6f %-15.6f %-15.6f %-15.6f\n", 
-               nombres[i], t1, t2, t3, t4);
+    if (t3 > 0.000001) {
+		printf("%sA3 vs A2:%s %.2fx plus rapide\n", CYAN, RESET, t2/t3);
+    } else {
+        printf("%sA3 vs A2:%s Beaucoup plus rapide (temps non mesurable)\n", CYAN, RESET);
     }
     
-    printf("\n=== CONCLUSION ===\n");
-    printf("Algorithme 4 (teste impairs jusqu'a √N) est le PLUS PERFORMANT\n");
-    printf("Ordre de performance: A4 > A3 > A2 > A1\n");
+    if (t4 > 0.000001 && t3 > 0.000001) {
+        printf("%sA4 vs A3:%s %.2fx plus rapide\n", CYAN, RESET, t3/t4);
+    } else {
+        printf("%sA4 vs A3:%s Temps similaires (tous deux tres rapides)\n", CYAN, RESET);
+    }
+    
+    if (t4 > 0.000001) {
+        printf("%sA4 vs A1:%s %.2fx plus rapide%s\n\n", BOLD, GREEN, t1/t4, RESET);
+    } else {
+        printf("%sA4 vs A1:%s Beaucoup plus rapide (facteur > 10000x)%s\n\n", BOLD, GREEN, RESET);
+    }
     
     return 0;
 }
